@@ -1,0 +1,217 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    /* Darker background to make black ferrofluid stand out */
+    background: radial-gradient(circle at center, #0a0a15 0%, #050510 100%);
+    font-family: 'Arial', sans-serif;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Gooey Effect Container - Ferrofluid Effect */
+.gooey-container {
+    width: 400px;
+    height: 400px;
+    position: relative;
+    /* Softer contrast for white blob - still sharp but not harsh */
+    filter: blur(15px) contrast(40) brightness(1.0);
+    background: transparent;
+    margin: 0 auto;
+    /* Ensure smooth transitions */
+    transition: filter 0.3s ease;
+}
+
+/* Individual Particle - Smaller for finer detail */
+.particle {
+    position: absolute;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    /* Softer off-white with subtle gradient */
+    background: radial-gradient(circle at 30% 30%, 
+        rgba(250, 250, 255, 0.9) 0%,
+        rgba(230, 230, 240, 0.85) 40%,
+        rgba(220, 220, 235, 0.9) 100%);
+    will-change: transform;
+    transform-origin: center;
+    /* Subtle glow */
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+}
+
+/* Eyes Container (Outside blur filter) */
+.eyes-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 10;
+}
+
+.eye {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    background: #000;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 1),
+                0 0 20px rgba(0, 0, 0, 0.8),
+                inset 0 0 5px rgba(50, 50, 50, 0.5);
+    transition: transform 0.1s ease-out;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+.left-eye {
+    left: -25px;
+}
+
+.right-eye {
+    right: -25px;
+}
+
+/* Status Panel */
+.status-panel {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    padding: 15px 20px;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 14px;
+    z-index: 20;
+    min-width: 200px;
+}
+
+.status-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.status-item:last-child {
+    margin-bottom: 0;
+}
+
+.status-label {
+    color: #aaa;
+    margin-right: 10px;
+}
+
+.status-value {
+    color: #fff;
+    font-weight: bold;
+}
+
+/* Controls */
+.controls {
+    position: absolute;
+    bottom: 30px;
+    display: flex;
+    gap: 15px;
+    z-index: 20;
+}
+
+.control-btn {
+    padding: 12px 24px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 25px;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    touch-action: manipulation;
+}
+
+.control-btn:active {
+    transform: scale(0.95);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.control-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Mood-based color tints - maintaining unified blob with sharp spikes */
+.gooey-container.mood-happy {
+    filter: blur(15px) contrast(40) brightness(1.0) hue-rotate(180deg) saturate(1.1);
+}
+
+.gooey-container.mood-tired {
+    filter: blur(15px) contrast(40) brightness(0.75);
+}
+
+.gooey-container.mood-angry {
+    filter: blur(13px) contrast(45) hue-rotate(0deg) saturate(1.2) brightness(1.05);
+}
+
+.gooey-container.mood-hangry {
+    filter: blur(13px) contrast(45) hue-rotate(15deg) saturate(1.15) brightness(1.0);
+}
+
+.gooey-container.mood-sad {
+    filter: blur(15px) contrast(40) hue-rotate(220deg) brightness(0.85);
+}
+
+.gooey-container.mood-hungry {
+    filter: blur(15px) contrast(40) hue-rotate(30deg) saturate(1.1) brightness(0.95);
+}
+
+.gooey-container.mood-neutral {
+    filter: blur(15px) contrast(40) brightness(1.0);
+}
+
+/* Responsive adjustments for touchscreen */
+@media (max-width: 768px) {
+    .gooey-container {
+        width: 300px;
+        height: 300px;
+    }
+    
+    .particle {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .status-panel {
+        top: 10px;
+        left: 10px;
+        font-size: 12px;
+        padding: 10px 15px;
+    }
+    
+    .controls {
+        bottom: 20px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .control-btn {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+}
+

@@ -1,0 +1,39 @@
+{
+  "slots": [],
+  "episodes": [],
+  "summary": null,
+  "summary_updated_at": null,
+  "turn_count": 0,
+  "memory_enabled": true,
+  "personality": {
+    "discipline": 0.5,
+    "humor": 0.5,
+    "curiosity": 0.5,
+    "warmth": 0.5,
+    "energy": 0.5,
+    "updated_at": null,
+    "last_drift_turn": 0
+  },
+  "traits": [],
+  "traits_enabled": true,
+  "trait_history": [],
+  "goals": [],
+  "relationship_depth": {
+    "first_conversation_date": null,
+    "depth_level": 0,
+    "inside_jokes": [],
+    "milestones": [],
+    "significant_moments": [],
+    "personal_reveals_count": 0,
+    "last_depth_update": null
+  },
+  "contextual_reminders": [],
+  "social_graph": {
+    "people": [],
+    "relationships": []
+  },
+  "mood_journal": {
+    "entries": [],
+    "patterns_detected": []
+  }
+}

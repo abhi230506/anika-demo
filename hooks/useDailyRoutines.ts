@@ -1,0 +1,311 @@
+"use client"
+
+import { useState, useEffect, useRef, useCallback } from 'react'
+
+export type RoutineType = 'morning' | 'evening' | 'late_night' | 'summary' | 'special_event' | 'goal_check_in' | 'goal_reminder'
+
+export interface DailyRoutine {
+  type: RoutineType
+  text: string
+  timestamp: string
+}
+
+interface DailyRoutineState {
+  lastMorningCheckIn: string | null // ISO date string
+  lastEveningCheckIn: string | null // ISO date string
+  lastSummaryDate: string | null // ISO date string
+  lastLateNightComment: string | null // ISO timestamp
+  lastSpecialEventCheck: string | null // ISO date string
+  lastGoalCheckIn: string | null // ISO date string
+  lastGoalReminder: string | null // ISO timestamp
+  dailySummaries: Array<{ date: string; summary: string }> // Store last 7 days
+  conversationCounts: Record<string, number> // Track conversations per day
+  sleepPatterns: Array<{ date: string; lastActivity: string; notes?: string }> // Track sleep patterns
+}
+
+const MORNING_HOUR_START = 6
+const MORNING_HOUR_END = 11
+const EVENING_HOUR_START = 19
+const EVENING_HOUR_END = 23
+const LATE_NIGHT_HOUR_START = 23 // 11 PM
+const LATE_NIGHT_HOUR_END = 6 // 6 AM next day
+const SUMMARY_HOUR = 22 // 10 PM for daily summaries
+
+const STORAGE_KEY = 'tamagotchi_daily_routines'
+
+/**
+ * Get current date in YYYY-MM-DD format
+ */
+function getToday(): string {
+  const now = new Date()
+  return now.toISOString().split('T')[0]
+}
+
+/**
+ * Get current date/time in ISO format
+ */
+function getNowISO(): string {
+  return new Date().toISOString()
+}
+
+/**
+ * Load routine state from localStorage
+ */
+function loadRoutineState(): DailyRoutineState {
+  if (typeof window === 'undefined') {
+    return {
+      lastMorningCheckIn: null,
+      lastEveningCheckIn: null,
+      lastSummaryDate: null,
+      lastLateNightComment: null,
+      dailySummaries: [],
+      conversationCounts: {},
+      sleepPatterns: [],
+    }
+  }
+
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (stored) {
+      const parsed = JSON.parse(stored) as DailyRoutineState
+      // Clean up old summaries (keep last 7 days)
+      const sevenDaysAgo = new Date()
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+      parsed.dailySummaries = parsed.dailySummaries.filter((s: any) => {
+        const summaryDate = new Date(s.date)
+        return summaryDate >= sevenDaysAgo
+      })
+      return parsed
+    }
+  } catch (e) {
+    console.warn('[DailyRoutines] Failed to load state:', e)
+  }
+
+  return {
+    lastMorningCheckIn: null,
+    lastEveningCheckIn: null,
+    lastSummaryDate: null,
+    lastLateNightComment: null,
+    lastSpecialEventCheck: null,
+    lastGoalCheckIn: null,
+    lastGoalReminder: null,
+    dailySummaries: [],
+    conversationCounts: {},
+    sleepPatterns: [],
+  }
+}
+
+/**
+ * Save routine state to localStorage
+ */
+function saveRoutineState(state: DailyRoutineState): void {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+  } catch (e) {
+    console.warn('[DailyRoutines] Failed to save state:', e)
+  }
+}
+
+export interface UseDailyRoutinesProps {
+  isIdle: boolean
+  phase: 'idle' | 'initiating' | 'listening' | 'thinking' | 'replying'
+  booted: boolean
+  onRoutine: (routine: DailyRoutine) => void
+  conversationState?: {
+    turn_count?: number
+    conversation_history?: Array<{ role: 'user' | 'assistant'; content: string }>
+  }
+}
+
+export function useDailyRoutines({
+  isIdle,
+  phase,
+  booted,
+  onRoutine,
+  conversationState,
+}: UseDailyRoutinesProps) {
+  const [state, setState] = useState<DailyRoutineState>(loadRoutineState)
+  const checkIntervalRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Save state whenever it changes
+  useEffect(() => {
+    saveRoutineState(state)
+  }, [state])
+
+  // Track conversation count for today
+  const prevTurnCountRef = useRef<number>(0)
+  useEffect(() => {
+    const currentTurnCount = conversationState?.turn_count || 0
+    if (currentTurnCount > prevTurnCountRef.current) {
+      const today = getToday()
+      setState(prev => ({
+        ...prev,
+        conversationCounts: {
+          ...prev.conversationCounts,
+          [today]: currentTurnCount,
+        },
+      }))
+      prevTurnCountRef.current = currentTurnCount
+    }
+  }, [conversationState?.turn_count])
+
+  // Main routine checker - runs every minute
+  useEffect(() => {
+    if (!booted) return
+
+    const checkRoutines = () => {
+      const now = new Date()
+      const hour = now.getHours()
+      const today = getToday()
+
+      // Morning check-in (6 AM - 11 AM)
+      if (hour >= MORNING_HOUR_START && hour < MORNING_HOUR_END) {
+        if (state.lastMorningCheckIn !== today) {
+          setState(prev => ({
+            ...prev,
+            lastMorningCheckIn: today,
+          }))
+          onRoutine({
+            type: 'morning',
+            text: '', // Will be generated by API
+            timestamp: getNowISO(),
+          })
+        }
+      }
+
+      // Evening check-in (7 PM - 11 PM)
+      if (hour >= EVENING_HOUR_START && hour < EVENING_HOUR_END) {
+        if (state.lastEveningCheckIn !== today) {
+          setState(prev => ({
+            ...prev,
+            lastEveningCheckIn: today,
+          }))
+          onRoutine({
+            type: 'evening',
+            text: '', // Will be generated by API
+            timestamp: getNowISO(),
+          })
+        }
+      }
+
+      // Daily summary (at 10 PM)
+      if (hour === SUMMARY_HOUR && state.lastSummaryDate !== today) {
+        const conversationCount = state.conversationCounts[today] || 0
+        if (conversationCount > 0 || conversationState?.conversation_history) {
+          setState(prev => ({
+            ...prev,
+            lastSummaryDate: today,
+          }))
+          onRoutine({
+            type: 'summary',
+            text: '', // Will be generated by API
+            timestamp: getNowISO(),
+          })
+        }
+      }
+
+      // Check for special events (holidays, birthdays) - once per day in the morning/afternoon
+      // Only check once per day and only during active hours
+      if ((hour >= 9 && hour < 18) && state.lastSpecialEventCheck !== today) {
+        setState(prev => ({
+          ...prev,
+          lastSpecialEventCheck: today,
+        }))
+        // Trigger special event check (will be handled by the component)
+        onRoutine({
+          type: 'special_event',
+          text: '', // Will be generated by API
+          timestamp: getNowISO(),
+        })
+      }
+
+      // Check for goal check-ins (once per day, afternoon/evening)
+      // Only check if we haven't done a goal check-in today
+      if ((hour >= 14 && hour < 20) && state.lastGoalCheckIn !== today) {
+        setState(prev => ({
+          ...prev,
+          lastGoalCheckIn: today,
+        }))
+        onRoutine({
+          type: 'goal_check_in',
+          text: '', // Will be generated by API
+          timestamp: getNowISO(),
+        })
+      }
+
+      // Late night check - check if it's late night and user becomes idle (just finished talking)
+      // Only comment when user is idle (not during active conversation)
+      const isLateNight = hour >= LATE_NIGHT_HOUR_START || hour < LATE_NIGHT_HOUR_END
+      
+      if (isLateNight && phase === 'idle' && isIdle) {
+        const today = getToday()
+        const lastComment = state.lastLateNightComment
+        if (!lastComment || !lastComment.startsWith(today)) {
+          // Check if it's been at least 30 minutes since last late night comment
+          if (!lastComment || (Date.now() - new Date(lastComment).getTime()) >= 30 * 60 * 1000) {
+            setState((prev) => ({
+              ...prev,
+              lastLateNightComment: getNowISO(),
+            }))
+            onRoutine({
+              type: 'late_night',
+              text: '', // Will be generated by API
+              timestamp: getNowISO(),
+            })
+          }
+        }
+      }
+    }
+
+    // Run immediately and then every minute
+    checkRoutines()
+    checkIntervalRef.current = setInterval(checkRoutines, 60 * 1000)
+
+    return () => {
+      if (checkIntervalRef.current) {
+        clearInterval(checkIntervalRef.current)
+        checkIntervalRef.current = null
+      }
+    }
+  }, [booted, state.lastMorningCheckIn, state.lastEveningCheckIn, state.lastSummaryDate, state.lastLateNightComment, state.lastSpecialEventCheck, phase, isIdle, onRoutine, conversationState])
+
+  // Track sleep patterns - update when activity happens late at night
+  const trackSleepPattern = useCallback(() => {
+    const now = new Date()
+    const hour = now.getHours()
+    const isLateNight = hour >= LATE_NIGHT_HOUR_START || hour < LATE_NIGHT_HOUR_END
+    
+    if (isLateNight && phase !== 'idle') {
+      const today = getToday()
+      setState(prev => {
+        const existing = prev.sleepPatterns.find(p => p.date === today)
+        if (existing) {
+          return prev // Already tracked today
+        }
+        return {
+          ...prev,
+          sleepPatterns: [
+            ...prev.sleepPatterns.slice(-6), // Keep last 7 days
+            {
+              date: today,
+              lastActivity: getNowISO(),
+            },
+          ],
+        }
+      })
+    }
+  }, [phase])
+
+  useEffect(() => {
+    if (phase !== 'idle') {
+      trackSleepPattern()
+    }
+  }, [phase, trackSleepPattern])
+
+  return {
+    state,
+    setState,
+  }
+}
+

@@ -1,0 +1,17 @@
+[Unit]
+Description=AI Tamagotchi Next.js Application
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/AI Tamagotchi
+Environment=NODE_ENV=production
+Environment=NODE_OPTIONS=--max-old-space-size=1024
+ExecStart=/usr/bin/pnpm start:prod
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+
