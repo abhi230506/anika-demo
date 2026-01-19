@@ -23,9 +23,9 @@ This repo contains a constrained, repurposed early-stage build of Anika.
 
 The code here originated as an earlier experimental version created during the initial stages of the project. It has since been intentionally adapted and stabilized to function as a standalone demonstration of Anika’s core ideas.
 
-**This demo version can run on any platform** (Windows, macOS, Linux) and is designed to showcase Anika's capabilities. However, **the actual production system is designed to run on a Raspberry Pi 5**, where it operates as a dedicated, always-on companion integrated into the physical environment.
+**This demo version can run on any platform** (Windows, macOS, Linux) and is designed to showcase Anika's early capabilities. However, **the actual production system is designed to run on a Raspberry Pi 5**, where it operates as a dedicated, always-on companion integrated into the physical environment.
 
-While the foundational algorithms and behavioral logic are present, the system is:
+While the foundational algorithms and behavioural logic are present, the system is:
 - simplified
 - partially abstracted
 - intentionally limited in scope
@@ -41,7 +41,7 @@ The complete system operates beyond what is exposed in this repository.
 People are bad at seeing themselves clearly in the moment.
 
 Anika exists to:
-- observe behavior over long time horizons
+- observe behaviour over long time horizons
 - detect recurring patterns across energy, focus, and habits
 - reflect those patterns back at moments where course-correction is still possible
 
@@ -49,10 +49,10 @@ She responds to state, not commands.
 
 ---
 
-## Long-Term Pattern Modeling
+## Long-Term Pattern Modelling
 
 Anika builds and maintains an evolving internal model based on:
-- behavioral consistency
+- behavioural consistency
 - energy and focus cycles
 - habit formation and decay
 - divergence between intention and action
