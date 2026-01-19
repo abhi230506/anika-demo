@@ -23,6 +23,8 @@ This repo contains a constrained, repurposed early-stage build of Anika.
 
 The code here originated as an earlier experimental version created during the initial stages of the project. It has since been intentionally adapted and stabilized to function as a standalone demonstration of Anika’s core ideas.
 
+**This demo version can run on any platform** (Windows, macOS, Linux) and is designed to showcase Anika's capabilities. However, **the actual production system is designed to run on a Raspberry Pi 5**, where it operates as a dedicated, always-on companion integrated into the physical environment.
+
 While the foundational algorithms and behavioral logic are present, the system is:
 - simplified
 - partially abstracted
@@ -164,7 +166,8 @@ This demo is primarily meant to give reviewers, such as co-op interviewers, some
 - AI: OpenAI GPT-4
 - TTS: ElevenLabs
 - UI: React, Tailwind CSS
-- Platform: Raspberry Pi 5 (ARM64)
+- **Demo Platform**: Cross-platform (Windows, macOS, Linux)
+- **Production Platform**: Raspberry Pi 5 (ARM64)
 
 ---
 
@@ -223,9 +226,10 @@ pnpm run start:prod
 
 ## Notes
 
-- Built for ARM64 (Raspberry Pi)
+- **Demo**: This repurposed version can run on any platform
+- **Production**: The actual system is built for ARM64 (Raspberry Pi 5)
 - Uses Next.js standalone output
-- Memory-limited build scripts included
+- Memory-limited build scripts included for Raspberry Pi deployment
 - Designed to run headless if needed
 
 ---
