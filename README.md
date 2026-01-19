@@ -1,6 +1,7 @@
 # Anika
 
-▶ Watch the demo video  
+▶ Watch the demo video 
+
 [![Anika Demo](assets/Anika%20video%20play.jpg)](https://youtu.be/kAmNQjdwiRA)
 
 ---
@@ -23,7 +24,7 @@ This repo contains a constrained, repurposed early-stage build of Anika.
 
 The code here originated as an earlier experimental version created during the initial stages of the project. It has since been intentionally adapted and stabilized to function as a standalone demonstration of Anika’s core ideas.
 
-**This demo version can run on any platform** (Windows, macOS, Linux) and is designed to showcase Anika's early capabilities. However, **the actual production system is designed to run on a Raspberry Pi 5**, where it operates as a dedicated, always-on companion integrated into the physical environment.
+**This demo version can run on any platform** (Windows, macOS, Linux) and showcases Anika’s early-stage capabilities. The full system extends beyond this demo and is built to run on a Raspberry Pi 5 as a dedicated, always-on companion integrated into the physical environment.
 
 While the foundational algorithms and behavioural logic are present, the system is:
 - simplified
